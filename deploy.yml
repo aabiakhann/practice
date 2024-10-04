@@ -1,0 +1,32 @@
+name: Deploy to Live Server
+
+on:
+  push:
+    branches:
+      - main  # Jab bhi main branch par push hoga
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up SSH key to access the server
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SERVER_KEY }}
+
+      # Deploy code to the server via SSH
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
+          cd /path/to/your/project &&
+          git pull origin main &&
+          # Add commands to restart your app or server
+          docker-compose down &&
+          docker-compose up -d --build
+          "
